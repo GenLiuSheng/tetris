@@ -152,17 +152,17 @@
     .virtual-controls {
       display: none;
       width: 100%;
-      max-width: 360px;
-      margin-top: 12px;
-      padding: 0 4px;
-      gap: 12px;
+      max-width: 420px;
+      margin-top: 16px;
+      padding: 0 8px;
+      gap: 16px;
       grid-template-columns: 1fr 1fr;
       align-items: stretch;
     }
     .vc-dpad,
     .vc-actions {
       display: grid;
-      gap: 8px;
+      gap: 12px;
     }
     .vc-dpad {
       grid-template-columns: repeat(3, 1fr);
@@ -176,32 +176,35 @@
       grid-template-rows: 1fr 1fr;
     }
     .vc-btn {
-      min-height: 56px;
+      min-height: 72px;
+      min-width: 72px;
       border: none;
-      border-radius: 12px;
-      font-size: 22px;
+      border-radius: 16px;
+      font-size: 28px;
       font-weight: 700;
       color: #fff;
-      background: rgba(255, 255, 255, 0.18);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       touch-action: none;
       cursor: pointer;
       transition: transform 0.08s, background 0.08s, opacity 0.08s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     .vc-btn:active,
     .vc-btn.vc-active {
-      transform: scale(0.92);
-      background: rgba(59, 130, 246, 0.55);
-      opacity: 0.95;
+      transform: scale(0.95);
+      background: rgba(59, 130, 246, 0.6);
+      opacity: 1;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
     .vc-btn[data-action="hard"] {
-      font-size: 16px;
-      background: rgba(239, 68, 68, 0.35);
+      font-size: 18px;
+      background: rgba(239, 68, 68, 0.4);
     }
     .vc-btn[data-action="hard"]:active,
     .vc-btn[data-action="hard"].vc-active {
-      background: rgba(239, 68, 68, 0.65);
+      background: rgba(239, 68, 68, 0.7);
     }
 
     /* ========== 移动端适配 ========== */
@@ -307,7 +310,7 @@
       }
       .virtual-controls {
         display: grid;
-        max-width: min(calc(100vw - 24px), 360px);
+        max-width: min(calc(100vw - 24px), 420px);
         padding-bottom: env(safe-area-inset-bottom);
       }
       .sidebar {

@@ -1,0 +1,17 @@
+【当前可访问 - 临时公网地址】
+https://johns-common-neighbor-wayne.trycloudflare.com
+
+说明：通过 Cloudflare 隧道暴露本机页面，电脑需保持开机且隧道进程运行。
+关闭终端或关机后此链接失效。
+
+二维码（手机扫码打开）：
+https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Fjohns-common-neighbor-wayne.trycloudflare.com
+
+---
+
+【长期公网地址 - 需完成 GitHub 部署】
+https://<你的GitHub用户名>.github.io/tetris/
+
+步骤见 DEPLOY.md，或运行：
+  gh auth login
+  .\deploy.ps1
