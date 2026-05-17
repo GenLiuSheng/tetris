@@ -12,12 +12,16 @@
 
 （Pages 启用后约 1～3 分钟生效。）
 
-### 一键部署
+### 一键上传到 GitHub
+
+在 PowerShell 中进入本目录后执行：
 
 ```powershell
-gh auth login    # 首次需浏览器登录 GitHub
-.\deploy.ps1     # 自动创建仓库、推送、开启 Pages
+cd "f:\Cursor Project\practice"
+.\push-to-github.ps1
 ```
+
+首次运行会引导登录 GitHub（浏览器验证码或 Token），随后自动创建仓库 `tetris`、推送代码并开启 Pages。
 
 ## 本地运行
 
