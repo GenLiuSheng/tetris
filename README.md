@@ -20,7 +20,7 @@
 
 部署完成后，可通过以下地址访问：
 
-**https://你的GitHub用户名.github.io/tetris/**
+**https://genliusheng.github.io/tetris/**
 
 > Pages 启用后通常需要 1～3 分钟生效
 
