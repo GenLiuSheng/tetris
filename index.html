@@ -13,7 +13,6 @@
     html, body {
       width: 100%;
       overflow-x: hidden;
-      touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
       -webkit-touch-callout: none;
       user-select: none;
@@ -62,14 +61,18 @@
     .canvas-wrap {
       position: relative;
       line-height: 0;
+      width: 300px;
+      aspect-ratio: 1 / 2;
     }
     #gameCanvas {
       display: block;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       border: 3px solid #4a5568;
       border-radius: 4px;
       background: #0d1117;
-      width: 300px;
-      height: 600px;
     }
     .sidebar {
       display: flex;
@@ -118,6 +121,10 @@
       cursor: pointer;
       transition: transform 0.1s, background 0.15s;
       touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      position: relative;
+      z-index: 20;
     }
     .game-btn:hover { transform: translateY(-1px); }
     .game-btn:active { transform: translateY(0); }
@@ -199,26 +206,43 @@
 
     /* ========== 移动端适配 ========== */
     @media (max-width: 768px) {
+      html {
+        height: 100%;
+      }
       body {
-        align-items: flex-start;
+        align-items: stretch;
+        justify-content: flex-start;
+        min-height: 100dvh;
+        height: auto;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
         padding-top: max(8px, env(safe-area-inset-top));
-        padding-right: max(0px, env(safe-area-inset-right));
+        padding-right: max(8px, env(safe-area-inset-right));
         padding-bottom: max(12px, env(safe-area-inset-bottom));
-        padding-left: max(0px, env(safe-area-inset-left));
+        padding-left: max(8px, env(safe-area-inset-left));
       }
       .game-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
         width: 100%;
-        max-width: 100vw;
-        padding: 8px 12px 16px;
-        gap: 10px;
+        max-width: 100%;
+        flex: 1;
+        padding: 0 4px 12px;
+        gap: 8px;
         border-radius: 0;
         background: transparent;
         box-shadow: none;
       }
+      /* 控制按钮区置顶，避免被挤出视口 */
+      .sidebar {
+        order: -1;
+        display: flex;
+        flex-direction: column;
+      }
       .play-column {
+        order: 0;
         width: 100%;
         max-width: 100%;
       }
@@ -270,14 +294,15 @@
         border-radius: 4px;
       }
       .canvas-wrap {
-        width: 100%;
-        max-width: min(calc(100vw - 24px), 360px);
-        aspect-ratio: 1 / 2;
+        width: min(
+          calc(100vw - 32px),
+          max(140px, calc((100dvh - 280px) / 2)),
+          360px
+        );
+        max-width: 100%;
         margin: 0 auto;
       }
       #gameCanvas {
-        width: 100% !important;
-        height: 100% !important;
         border-width: 2px;
       }
       .virtual-controls {
@@ -289,7 +314,8 @@
         width: 100%;
         max-width: min(calc(100vw - 24px), 360px);
         min-width: unset;
-        gap: 8px;
+        gap: 6px;
+        flex-shrink: 0;
       }
       /* 侧栏中与 mobile-hud 重复的面板在移动端隐藏 */
       .panel-score,
@@ -297,14 +323,27 @@
       .panel-next {
         display: none;
       }
+      .status-msg {
+        order: 1;
+      }
       .controls {
+        order: 0;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
+        gap: 8px;
+        width: 100%;
+        padding: 4px 0 6px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: linear-gradient(180deg, #16213e 70%, transparent);
       }
       .controls .game-btn {
         flex: 1;
-        min-width: calc(33% - 6px);
-        padding: 12px 8px;
+        min-width: 0;
+        min-height: 48px;
+        padding: 14px 10px;
+        font-size: 15px;
       }
       .hint {
         display: none;
@@ -725,7 +764,7 @@
       if (gameState === STATE.PAUSED) {
         drawOverlay('已暂停');
       } else if (gameState === STATE.IDLE) {
-        drawOverlay(isMobileContext() ? '点【开始】' : '按【开始】');
+        drawOverlay(isMobileContext() ? '点【开始】开始' : '按【开始】');
       } else if (gameState === STATE.OVER) {
         drawOverlay('GAME OVER');
       }
@@ -893,13 +932,44 @@
       }
     });
 
-    btnStart.addEventListener('click', startGame);
-    btnPause.addEventListener('click', () => {
+    // 绑定游戏控制按钮（移动端用 touchstart，避免 click 被吞）
+    function bindTapControl(btn, handler) {
+      let handledByTouch = false;
+      const run = (e) => {
+        if (btn.disabled) return;
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        handler();
+      };
+      btn.addEventListener('touchstart', (e) => {
+        if (btn.disabled) return;
+        handledByTouch = true;
+        run(e);
+      }, { passive: false });
+      btn.addEventListener('click', (e) => {
+        if (handledByTouch) {
+          handledByTouch = false;
+          e.preventDefault();
+          return;
+        }
+        handler();
+      });
+    }
+
+    bindTapControl(btnStart, startGame);
+    bindTapControl(btnPause, () => {
       if (gameState === STATE.RUNNING || gameState === STATE.PAUSED) {
         togglePause();
       }
     });
-    btnRestart.addEventListener('click', restartGame);
+    bindTapControl(btnRestart, restartGame);
+
+    // 仅在指定区域阻止滚动，不影响按钮点击
+    function blockTouchScroll(el) {
+      el.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    }
 
     // ========== 移动端控制初始化 ==========
     function initMobileControls() {
@@ -907,10 +977,8 @@
       if (!isMobileContext()) return;
       mobileControlsInited = true;
 
-      // 阻止页面在触控时滚动/缩放
-      document.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-      }, { passive: false });
+      blockTouchScroll(canvas);
+      blockTouchScroll(virtualControls);
 
       // 虚拟按钮：touchstart / touchend，避免 300ms 延迟
       const actionMap = {
@@ -971,15 +1039,18 @@
 
       canvas.addEventListener('touchstart', (e) => {
         if (e.touches.length !== 1) return;
-        e.preventDefault();
         touchStartX = e.touches[0].clientX;
         touchStartY = e.touches[0].clientY;
         touchStartTime = Date.now();
+        // 未开始/暂停时点击画布等同按【开始】
+        if (gameState === STATE.IDLE || gameState === STATE.PAUSED) {
+          e.preventDefault();
+          if (gameState === STATE.IDLE) startGame();
+          else togglePause();
+        }
       }, { passive: false });
 
       canvas.addEventListener('touchend', (e) => {
-        if (gameState !== STATE.RUNNING) return;
-        e.preventDefault();
         const t = e.changedTouches[0];
         const dx = t.clientX - touchStartX;
         const dy = t.clientY - touchStartY;
@@ -987,25 +1058,26 @@
         const absDy = Math.abs(dy);
         const duration = Date.now() - touchStartTime;
 
+        if (gameState !== STATE.RUNNING) return;
+
         if (absDx < TAP_MAX_MOVE && absDy < TAP_MAX_MOVE && duration < TAP_MAX_DURATION) {
+          e.preventDefault();
           GameInput.doRotate();
           return;
         }
 
         if (absDx > absDy && absDx >= SWIPE_THRESHOLD) {
+          e.preventDefault();
           if (dx > 0) GameInput.moveRight();
           else GameInput.moveLeft();
           return;
         }
 
         if (absDy >= SWIPE_THRESHOLD && dy > 0) {
+          e.preventDefault();
           GameInput.startSoftDrop();
           setTimeout(() => GameInput.stopSoftDrop(), 100);
         }
-      }, { passive: false });
-
-      canvas.addEventListener('touchmove', (e) => {
-        e.preventDefault();
       }, { passive: false });
 
       document.getElementById('mobileHud').setAttribute('aria-hidden', 'false');
