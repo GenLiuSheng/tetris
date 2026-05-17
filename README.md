@@ -4,13 +4,20 @@
 
 ## 在线游玩
 
-部署成功后，公网地址为：
+### 长期网址（GitHub Pages）
 
-**https://\<GitHub用户名\>.github.io/tetris/**
+完成 [DEPLOY.md](./DEPLOY.md) 中的部署步骤后，公网地址为：
 
-（请将 `tetris` 替换为实际仓库名；Pages 启用后约 1～3 分钟生效。）
+**https://\<你的GitHub用户名\>.github.io/tetris/**
 
-手机扫码或浏览器输入上述地址即可打开。
+（Pages 启用后约 1～3 分钟生效。）
+
+### 一键部署
+
+```powershell
+gh auth login    # 首次需浏览器登录 GitHub
+.\deploy.ps1     # 自动创建仓库、推送、开启 Pages
+```
 
 ## 本地运行
 
